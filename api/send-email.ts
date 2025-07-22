@@ -2,16 +2,26 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Configuración CORS
-  res.setHeader('Access-Control-Allow-Origin', 'https://vera-ortiz-o7squ9dkp-hender-labradors-projects.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Configuración CORS MEJORADA
+  const allowedOrigins = [
+    'https://vera-ortiz-o7squ9dkp-hender-labradors-projects.vercel.app',
+    'http://localhost:4321' // Para desarrollo local
+  ];
   
-  // Manejar preflight (CORS)
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  const origin = req.headers.origin || '';
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
+  
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
+  // Manejo de Preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Método no permitido' });
   }
