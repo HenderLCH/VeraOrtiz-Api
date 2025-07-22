@@ -2,21 +2,18 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const origin = req.headers.origin;
-  const allowed = [
-    "https://vera-ortiz-o7squ9dkp-hender-labradors-projects.vercel.app",
-    "http://localhost:4321"
-  ];
-  if (origin && allowed.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // ————— CORS para cualquier origen (incluidos previews) —————
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === "OPTIONS") {
+  // Responde siempre 200 OK al preflight
+  if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
+  // Solo permitimos POST en la lógica de envío
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Método no permitido' });
   }
@@ -29,11 +26,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const resend = new Resend(RESEND_API_KEY);
 
   try {
-    const data = req.body || (typeof req.body === 'string' ? JSON.parse(req.body) : {});
+    const data = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const requiredFields = ['name', 'email', 'phone', 'message'];
     const missingFields = requiredFields.filter(field => !data[field]);
     if (missingFields.length > 0) {
-      return res.status(400).json({ success: false, message: `Faltan campos requeridos: ${missingFields.join(', ')}` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Faltan campos requeridos: ${missingFields.join(', ')}` });
     }
 
     // Validar email
@@ -72,6 +71,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({ success: true, message: 'Mensaje enviado correctamente' });
   } catch (error: any) {
-    return res.status(500).json({ success: false, message: error instanceof Error ? error.message : 'Error interno del servidor' });
+    return res
+      .status(500)
+      .json({ success: false, message: error instanceof Error ? error.message : 'Error interno del servidor' });
   }
 }
