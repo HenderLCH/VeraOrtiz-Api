@@ -6,19 +6,11 @@
       "use": "@vercel/node"
     }
   ],
-  "headers": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "https://vera-ortiz-frontend.vercel.app"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "POST, OPTIONS"
-        }
-      ]
+      "src": "/api/send-email",
+      "dest": "/api/send-email.ts",
+      "methods": ["POST", "OPTIONS"]
     }
   ]
 }
