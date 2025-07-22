@@ -1,23 +1,41 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Resend } from 'resend';
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Configuración manual de CORS
-  res.setHeader('Access-Control-Allow-Origin', 'https://vera-ortiz-web.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  // Manejar preflight para CORS
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  // 1. Configuración CORS simplificada
+  const origin = req.headers.origin || '';
+  const allowedOrigins = ['https://vera-ortiz.vercel.app'];
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, message: 'Método no permitido' });
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Vary', 'Origin');
+
+  // 2. Manejo mejorado de OPTIONS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({
+      status: 'OK',
+      message: 'Preflight CORS request successful'
+    });
   }
+
+  // 3. Solo permitir POST después de OPTIONS
+  if (req.method !== 'POST') {
+    return res.status(405).json({ 
+      success: false, 
+      message: 'Método no permitido' 
+    });
+  }
+
 
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {
-    return res.status(500).json({ success: false, message: 'Falta RESEND_API_KEY' });
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Falta RESEND_API_KEY' 
+    });
   }
 
   const resend = new Resend(RESEND_API_KEY);
