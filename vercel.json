@@ -1,16 +1,19 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.ts", "use": "@vercel/node" }
+    {
+      "src": "api/*.ts",
+      "use": "@vercel/node"
+    }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "https://vera-ortiz-o7squ9dkp-hender-labradors-projects.vercel.app" },
-        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
-      ]
+      "headers": {
+        "Access-Control-Allow-Origin": "https://vera-ortiz-o7squ9dkp-hender-labradors-projects.vercel.app",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
+      }
     },
     {
       "src": "/api/send-email",
