@@ -1,17 +1,39 @@
-export default function handler(req, res) {
-  // Solo responde a GET para verificar el estado
-  if (req.method === 'GET') {
-    return res.status(200).json({ 
-      status: 'API funcionando',
-      endpoints: {
-        contact: '/api/send-email (POST)'
-      }
-    });
-  }
+const express = require("express");
+const cors = require("cors");
+const sendEmailHandler = require("./send-email.js");
 
-  // Para otros métodos (POST, etc.)
-  return res.status(404).json({ 
-    error: 'Not found',
-    message: 'Use el endpoint específico /api/send-email para enviar mensajes'
+const app = express();
+const allowedOrigins = ["https://vera-ortiz.vercel.app"];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permitir solicitudes sin origen (como curl o Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+  credentials: true,
+}));
+
+app.use(express.json());
+
+app.get('/api', (req, res) => {
+  res.status(200).json({
+    status: 'API funcionando',
+    endpoints: {
+      contact: '/api/send-email (POST)'
+    }
   });
-}
+});
+
+app.post("/api/send-email", sendEmailHandler);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en el puerto ${PORT}`);
+});
