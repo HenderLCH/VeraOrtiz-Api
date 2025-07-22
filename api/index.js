@@ -3,17 +3,19 @@ const cors = require("cors");
 const sendEmailHandler = require("./send-email.js");
 
 const app = express();
-const allowedOrigins = ["https://vera-ortiz.vercel.app"];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permitir solicitudes sin origen (como curl o Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    // Permitir todos los subdominios de vercel.app y el dominio principal
+    if (
+      origin.endsWith(".vercel.app") ||
+      origin === "https://vera-ortiz.vercel.app"
+    ) {
       return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
     }
+    // No lanzar error, solo rechazar el origen
+    return callback(null, false);
   },
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
